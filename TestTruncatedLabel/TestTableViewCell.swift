@@ -9,7 +9,8 @@
 import UIKit
 
 protocol TestTableViewCellProtocol: class {
-    func requireReloadCell(cell: TestTableViewCell)
+    func cellDidPressSeemore(cell: TestTableViewCell)
+    func cellDidPressTextContent(cell: TestTableViewCell)
 }
 
 class TestTableViewCell: UITableViewCell {
@@ -19,23 +20,44 @@ class TestTableViewCell: UITableViewCell {
     @IBOutlet weak var testLabel: UILabel!
     @IBOutlet weak var seeMoreButton: UIButton!
     @IBAction func pressSeemore(_ sender: Any) {
-        print("press Seemore")
-        testLabel.numberOfLines = 0
-        delegate?.requireReloadCell(cell: self)
+        delegate?.cellDidPressSeemore(cell: self)
     }
     
     override func awakeFromNib() {
-        testLabel.numberOfLines = 2
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(tap:)))
+        testLabel.addGestureRecognizer(tap)
+        testLabel.isUserInteractionEnabled = true
+    }
+    
+    @objc private func handleTap(tap: UITapGestureRecognizer) {
+        delegate?.cellDidPressTextContent(cell: self)
     }
     
     var testText: String = "" {
         didSet {
             testLabel.text = testText
-            
-            seeMoreButton.isHidden = !testLabel.isTruncated()
         }
     }
 
+    func truncateLabel() {
+        testLabel.numberOfLines = 3
+    }
+    
+    func showFullLabel() {
+        testLabel.numberOfLines = 0
+    }
+    
+    var isTextTruncated: Bool {
+        return testLabel.isTruncated()
+    }
+    
+    func showSeemore() {
+        seeMoreButton.isHidden = false
+    }
+    
+    func hideSeemore() {
+        seeMoreButton.isHidden = true
+    }
 }
 
 extension UILabel {
